@@ -19,6 +19,42 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim2;
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_TIM2_Init(void);
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
 void display7SEG(int num) {
 	switch (num) {
 	case 0:
@@ -69,6 +105,26 @@ void display7SEG(int num) {
 const int MAX_LED = 4;
 int index_led = 0;
 int led_buffer[4] = {1, 2, 3, 4};
+int hour = 15, minute = 8, second = 50;
+void updateClockBuffer () {
+    if (minute <= 9) {
+    	led_buffer[2] = 0;
+    	led_buffer[3] = minute;
+    }
+    else {
+    	led_buffer[2] = minute / 10;
+    	led_buffer[3] = minute % 10;
+    }
+
+    if (hour <= 9) {
+    	led_buffer[0] = 0;
+    	led_buffer[1] = hour;
+    }
+    else {
+    	led_buffer[0] = hour / 10;
+    	led_buffer[1] = hour % 10;
+    }
+}
 void update7SEG (int index) {
 	switch (index) {
 	case 0:
@@ -95,54 +151,29 @@ void update7SEG (int index) {
 		break;
 	}
 }
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim2;
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_TIM2_Init(void);
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
 int timer0_counter = 0;
+int timer1_counter = 0;
 int timer0_flag = 0;
+int timer1_flag = 0;
 int TIMER_CYCLE = 10;
 void setTimer0 (int duration) {
 	timer0_counter = duration / TIMER_CYCLE;
 	timer0_flag = 0;
+}
+void setTimer1 (int duration) {
+	timer1_counter = duration / TIMER_CYCLE;
+	timer1_flag = 0;
 }
 void timer_run () {
 	if (timer0_counter > 0) {
 		timer0_counter--;
 		if (timer0_counter == 0) timer0_flag = 1;
 	}
+	if (timer1_counter > 0) {
+			timer1_counter--;
+			if (timer1_counter == 0) timer1_flag = 1;
+		}
 }
 /* USER CODE END 0 */
 
@@ -181,33 +212,14 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int hour = 15, minute = 8, second = 50;
-    void updateClockBuffer () {
-    	if (minute <= 9) {
-    		led_buffer[2] = 0;
-    		led_buffer[3] = minute;
-    	}
-    	else {
-    		led_buffer[2] = minute / 10;
-    		led_buffer[3] = minute % 10;
-    	}
-
-    	if (hour <= 9) {
-    		led_buffer[0] = 0;
-    		led_buffer[1] = hour;
-    	}
-    	else {
-    		led_buffer[0] = hour / 10;
-    		led_buffer[1] = hour % 10;
-    	}
-    }
-
   // Idea: Use setTimer0(1000) and TIMER_CYCLE = 10, so timer0_counter = 1000 / 10 = 100 => The LED toggles every second
   setTimer0(10);
+  setTimer1(10);
   while (1)
   {
     if (timer0_flag == 1) {
     	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    	HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
     	setTimer0(1000);
         second++;
         if (second >= 60) {
@@ -223,6 +235,11 @@ int main(void)
         }
         updateClockBuffer();
     }
+  	  if (timer1_flag == 1) {
+  		  setTimer1(250);
+  		  if (index_led > 3) index_led = 0;
+  		  update7SEG(index_led++);
+  	  }
   }
   /* USER CODE END 3 */
 }
