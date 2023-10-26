@@ -543,8 +543,8 @@ int main(void)
  80004a8:	681b      	ldr	r3, [r3, #0]
  80004aa:	2b01      	cmp	r3, #1
  80004ac:	d1fb      	bne.n	80004a6 <main+0x2a>
-		  setTimer2(4);
- 80004ae:	2004      	movs	r0, #4
+		  setTimer2(50);
+ 80004ae:	2032      	movs	r0, #50	; 0x32
  80004b0:	f7ff ffb0 	bl	8000414 <setTimer2>
 		  updateLEDMatrix(index++);
  80004b4:	687b      	ldr	r3, [r7, #4]
