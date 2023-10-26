@@ -185,7 +185,7 @@ int main(void)
   while (1)
   {
 	  if (timer2_flag == 1) {
-		  setTimer2(50);
+		  setTimer2(40);
 		  updateLEDMatrix(index++);
 		  if (index > 7) {
 			  index = 0;
