@@ -154,11 +154,9 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// Idea: Use another software timer called timer1 for presenting 4  7-SEG LEDs.
-// Use  setTimer1(250) and TIMER_CYCLE = 10, we have the timer1_counter = 25, therefore, the switching time between 7-SEG LEDS is 0.25s
 int timer2_counter = 0;
 int timer2_flag = 0;
-int TIMER_CYCLE = 1;
+int TIMER_CYCLE = 10;
 void setTimer2 (int duration) {
 	timer2_counter = duration / TIMER_CYCLE;
 	timer2_flag = 0;
@@ -212,7 +210,7 @@ int main(void)
   while (1)
   {
 	  if (timer2_flag == 1) {
-		  setTimer2(4);
+		  setTimer2(40);
 		  updateLEDMatrix(index++);
 		  if (index > 7) {
 			  shiftBit();
