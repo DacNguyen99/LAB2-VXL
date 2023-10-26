@@ -131,7 +131,19 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int timer0_counter = 0;
+int timer0_flag = 0;
+int TIME_CYCLE = 10;
+void setTimer0 (int duration) {
+	timer0_counter = duration / TIME_CYCLE;
+	timer0_flag = 0;
+}
+void timer_run () {
+	if (timer0_counter > 0) {
+		timer0_counter--;
+		if (timer0_counter == 0) timer0_flag = 1;
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -169,42 +181,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int hour = 15, minute = 8, second = 50;
-  void updateClockBuffer () {
-  	if (minute <= 9) {
-  		led_buffer[2] = 0;
-  		led_buffer[3] = minute;
-  	}
-  	else {
-  		led_buffer[2] = minute / 10;
-  		led_buffer[3] = minute % 10;
-  	}
-
-  	if (hour <= 9) {
-  		led_buffer[0] = 0;
-  		led_buffer[1] = hour;
-  	}
-  	else {
-  		led_buffer[0] = hour / 10;
-  		led_buffer[1] = hour % 10;
-  	}
-  }
+  setTimer0(1000);
   while (1)
   {
-    second++;
-    if (second >= 60) {
-    	second = 0;
-    	minute++;
+    if (timer0_flag == 1) {
+    	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    	setTimer0(2000);
     }
-    if (minute >= 60) {
-    	minute = 0;
-    	hour++;
-    }
-    if (hour >= 24) {
-    	hour = 0;
-    }
-    updateClockBuffer();
-    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -331,25 +314,9 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-// LED toggles every cycle, DOT toggles every second
-int counter = 100;
-int cycle_flag = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (index_led > 3) {
-		index_led = 0;
-		cycle_flag = 1;
-	}
-	counter--;
-	if (counter == 0) {
-		counter = 100;
-		if (cycle_flag == 1) {
-			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			cycle_flag = 0;
-		}
-		update7SEG(index_led++);
-		HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
-	}
+	timer_run();
 }
 /* USER CODE END 4 */
 
