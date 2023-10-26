@@ -1,4 +1,4 @@
-/* USER CODE BEGIN Header */
+	/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
@@ -19,77 +19,73 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-void display7SEG(int num) {
-	switch (num) {
-	case 0:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG6_Pin, SET);
-		break;
-	case 1:
-		HAL_GPIO_WritePin(GPIOB, SEG1_Pin|SEG2_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin|SEG6_Pin, SET);
-		break;
-	case 2:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG3_Pin|SEG4_Pin|SEG6_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG2_Pin|SEG5_Pin, SET);
-		break;
-	case 3:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin|SEG6_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG4_Pin|SEG5_Pin, SET);
-		break;
-	case 4:
-		HAL_GPIO_WritePin(GPIOB, SEG1_Pin|SEG2_Pin|SEG5_Pin|SEG6_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG3_Pin|SEG4_Pin, SET);
-		break;
-	case 5:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG2_Pin|SEG3_Pin|SEG5_Pin|SEG6_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG1_Pin|SEG4_Pin, SET);
-		break;
-	case 6:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG2_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin|SEG6_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG1_Pin, SET);
-		break;
-	case 7:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG3_Pin|SEG4_Pin|SEG5_Pin|SEG6_Pin, SET);
-		break;
-	case 8:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin|SEG6_Pin, RESET);
-		break;
-	case 9:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin|SEG5_Pin|SEG6_Pin, RESET);
-		HAL_GPIO_WritePin(GPIOB, SEG4_Pin, SET);
-		break;
-	default:
-		HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin|SEG6_Pin, SET);
-		break;
-	}
+// Idea : Split the hexadecimal number into corresponding bits for display
+void displayDOT ( uint8_t num ) {
+	HAL_GPIO_WritePin(ENM0_GPIO_Port, ENM7_Pin, !( num & 0x01 ));
+	HAL_GPIO_WritePin(ENM1_GPIO_Port, ENM6_Pin, !( num & 0x02 ));
+	HAL_GPIO_WritePin(ENM2_GPIO_Port, ENM5_Pin, !( num & 0x04 ));
+	HAL_GPIO_WritePin(ENM3_GPIO_Port, ENM4_Pin, !( num & 0x08 ));
+	HAL_GPIO_WritePin(ENM4_GPIO_Port, ENM3_Pin, !( num & 0x10 ));
+	HAL_GPIO_WritePin(ENM5_GPIO_Port, ENM2_Pin, !( num & 0x20 ));
+	HAL_GPIO_WritePin(ENM6_GPIO_Port, ENM1_Pin, !( num & 0x40 ));
+	HAL_GPIO_WritePin(ENM7_GPIO_Port, ENM0_Pin, !( num & 0x80 ));
 }
 
-const int MAX_LED = 4;
-int index_led = 0;
-int led_buffer[4] = {1, 2, 3, 4};
-void update7SEG (int index) {
+// Idea : For the first time running , turn off all the LEDs for easy display
+void clearMatrix () {
+	HAL_GPIO_WritePin(ROW0_GPIO_Port, ROW0_Pin, 1);
+	HAL_GPIO_WritePin(ROW1_GPIO_Port, ROW1_Pin, 1);
+	HAL_GPIO_WritePin(ROW2_GPIO_Port, ROW2_Pin, 1);
+	HAL_GPIO_WritePin(ROW3_GPIO_Port, ROW3_Pin, 1);
+	HAL_GPIO_WritePin(ROW4_GPIO_Port, ROW4_Pin, 1);
+	HAL_GPIO_WritePin(ROW5_GPIO_Port, ROW5_Pin, 1);
+	HAL_GPIO_WritePin(ROW6_GPIO_Port, ROW6_Pin, 1);
+	HAL_GPIO_WritePin(ROW7_GPIO_Port, ROW7_Pin, 1);
+}
+
+// Idea : Display the hexadecimal values in the corresponding row using led scanning
+uint8_t matrix_buffer[8] = {0x18, 0x3c, 0x66, 0x7e, 0x66, 0x66, 0x66}; // Character A
+void updateLEDMatrix (int index) {
 	switch (index) {
 	case 0:
-		HAL_GPIO_WritePin(GPIOA, EN0_Pin, 0);
-		HAL_GPIO_WritePin(GPIOA, EN1_Pin|EN2_Pin|EN3_Pin, 1);
-		display7SEG(led_buffer[index]);
+		displayDOT(matrix_buffer[0]);
+		HAL_GPIO_WritePin(ROW7_GPIO_Port, ROW7_Pin, 1);
+		HAL_GPIO_WritePin(ROW0_GPIO_Port, ROW0_Pin, 0);
 		break;
 	case 1:
-		HAL_GPIO_WritePin(GPIOA, EN1_Pin, 0);
-		HAL_GPIO_WritePin(GPIOA, EN0_Pin|EN2_Pin|EN3_Pin, 1);
-		display7SEG(led_buffer[index]);
+		displayDOT(matrix_buffer[1]);
+		HAL_GPIO_WritePin(ROW0_GPIO_Port, ROW0_Pin, 1);
+		HAL_GPIO_WritePin(ROW1_GPIO_Port, ROW1_Pin, 0);
 		break;
 	case 2:
-		HAL_GPIO_WritePin(GPIOA, EN2_Pin, 0);
-		HAL_GPIO_WritePin(GPIOA, EN0_Pin|EN1_Pin|EN3_Pin, 1);
-		display7SEG(led_buffer[index]);
+		displayDOT(matrix_buffer[2]);
+		HAL_GPIO_WritePin(ROW1_GPIO_Port, ROW1_Pin, 1);
+		HAL_GPIO_WritePin(ROW2_GPIO_Port, ROW2_Pin, 0);
 		break;
 	case 3:
-		HAL_GPIO_WritePin(GPIOA, EN3_Pin, 0);
-		HAL_GPIO_WritePin(GPIOA, EN0_Pin|EN1_Pin|EN2_Pin, 1);
-		display7SEG(led_buffer[index]);
+		displayDOT(matrix_buffer[3]);
+		HAL_GPIO_WritePin(ROW2_GPIO_Port, ROW2_Pin, 1);
+		HAL_GPIO_WritePin(ROW3_GPIO_Port, ROW3_Pin, 0);
+		break;
+	case 4:
+		displayDOT(matrix_buffer[4]);
+		HAL_GPIO_WritePin(ROW3_GPIO_Port, ROW3_Pin, 1);
+		HAL_GPIO_WritePin(ROW4_GPIO_Port, ROW4_Pin, 0);
+		break;
+	case 5:
+		displayDOT(matrix_buffer[5]);
+		HAL_GPIO_WritePin(ROW4_GPIO_Port, ROW4_Pin, 1);
+		HAL_GPIO_WritePin(ROW5_GPIO_Port, ROW5_Pin, 0);
+		break;
+	case 6:
+		displayDOT(matrix_buffer[6]);
+		HAL_GPIO_WritePin(ROW5_GPIO_Port, ROW5_Pin, 1);
+		HAL_GPIO_WritePin(ROW6_GPIO_Port, ROW6_Pin, 0);
+		break;
+	case 7:
+		displayDOT(matrix_buffer[7]);
+		HAL_GPIO_WritePin(ROW6_GPIO_Port, ROW6_Pin, 1);
+		HAL_GPIO_WritePin(ROW7_GPIO_Port, ROW7_Pin, 0);
 		break;
 	default:
 		break;
@@ -131,17 +127,19 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int timer0_counter = 0;
-int timer0_flag = 0;
+// Idea: Use another software timer called timer1 for presenting 4  7-SEG LEDs.
+// Use  setTimer1(250) and TIMER_CYCLE = 10, we have the timer1_counter = 25, therefore, the switching time between 7-SEG LEDS is 0.25s
+int timer2_counter = 0;
+int timer2_flag = 0;
 int TIMER_CYCLE = 10;
-void setTimer0 (int duration) {
-	timer0_counter = duration / TIMER_CYCLE;
-	timer0_flag = 0;
+void setTimer2 (int duration) {
+	timer2_counter = duration / TIMER_CYCLE;
+	timer2_flag = 0;
 }
 void timer_run () {
-	if (timer0_counter > 0) {
-		timer0_counter--;
-		if (timer0_counter == 0) timer0_flag = 1;
+	if (timer2_counter > 0) {
+		timer2_counter--;
+		if (timer2_counter == 0) timer2_flag = 1;
 	}
 }
 /* USER CODE END 0 */
@@ -181,48 +179,18 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int hour = 15, minute = 8, second = 50;
-    void updateClockBuffer () {
-    	if (minute <= 9) {
-    		led_buffer[2] = 0;
-    		led_buffer[3] = minute;
-    	}
-    	else {
-    		led_buffer[2] = minute / 10;
-    		led_buffer[3] = minute % 10;
-    	}
-
-    	if (hour <= 9) {
-    		led_buffer[0] = 0;
-    		led_buffer[1] = hour;
-    	}
-    	else {
-    		led_buffer[0] = hour / 10;
-    		led_buffer[1] = hour % 10;
-    	}
-    }
-
-  // Idea: Use setTimer0(1000) and TIMER_CYCLE = 10, so timer0_counter = 1000 / 10 = 100 => The LED toggles every second
-  setTimer0(10);
+  setTimer2(10);
+  int index = 0;
+  clearMatrix();
   while (1)
   {
-    if (timer0_flag == 1) {
-    	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    	setTimer0(1000);
-        second++;
-        if (second >= 60) {
-        	second = 0;
-        	minute++;
-        }
-        if (minute >= 60) {
-        	minute = 0;
-        	hour++;
-        }
-        if (hour >= 24) {
-        	hour = 0;
-        }
-        updateClockBuffer();
-    }
+	  if (timer2_flag == 1) {
+		  setTimer2(4);
+		  updateLEDMatrix(index++);
+		  if (index > 7) {
+			  index = 0;
+		  }
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -321,26 +289,38 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, DOT_Pin|LED_Pin|EN0_Pin|EN1_Pin
-                          |EN2_Pin|EN3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, ENM0_Pin|ENM1_Pin|DOT_Pin|LED_Pin
+                          |EN0_Pin|EN1_Pin|EN2_Pin|EN3_Pin
+                          |ENM2_Pin|ENM3_Pin|ENM4_Pin|ENM5_Pin
+                          |ENM6_Pin|ENM7_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin
-                          |SEG4_Pin|SEG5_Pin|SEG6_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|ROW2_Pin
+                          |ROW3_Pin|ROW4_Pin|ROW5_Pin|ROW6_Pin
+                          |ROW7_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin
+                          |SEG6_Pin|ROW0_Pin|ROW1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : DOT_Pin LED_Pin EN0_Pin EN1_Pin
-                           EN2_Pin EN3_Pin */
-  GPIO_InitStruct.Pin = DOT_Pin|LED_Pin|EN0_Pin|EN1_Pin
-                          |EN2_Pin|EN3_Pin;
+  /*Configure GPIO pins : ENM0_Pin ENM1_Pin DOT_Pin LED_Pin
+                           EN0_Pin EN1_Pin EN2_Pin EN3_Pin
+                           ENM2_Pin ENM3_Pin ENM4_Pin ENM5_Pin
+                           ENM6_Pin ENM7_Pin */
+  GPIO_InitStruct.Pin = ENM0_Pin|ENM1_Pin|DOT_Pin|LED_Pin
+                          |EN0_Pin|EN1_Pin|EN2_Pin|EN3_Pin
+                          |ENM2_Pin|ENM3_Pin|ENM4_Pin|ENM5_Pin
+                          |ENM6_Pin|ENM7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SEG0_Pin SEG1_Pin SEG2_Pin SEG3_Pin
-                           SEG4_Pin SEG5_Pin SEG6_Pin */
-  GPIO_InitStruct.Pin = SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin
-                          |SEG4_Pin|SEG5_Pin|SEG6_Pin;
+  /*Configure GPIO pins : SEG0_Pin SEG1_Pin SEG2_Pin ROW2_Pin
+                           ROW3_Pin ROW4_Pin ROW5_Pin ROW6_Pin
+                           ROW7_Pin SEG3_Pin SEG4_Pin SEG5_Pin
+                           SEG6_Pin ROW0_Pin ROW1_Pin */
+  GPIO_InitStruct.Pin = SEG0_Pin|SEG1_Pin|SEG2_Pin|ROW2_Pin
+                          |ROW3_Pin|ROW4_Pin|ROW5_Pin|ROW6_Pin
+                          |ROW7_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin
+                          |SEG6_Pin|ROW0_Pin|ROW1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
