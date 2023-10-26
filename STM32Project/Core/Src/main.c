@@ -91,6 +91,33 @@ void updateLEDMatrix (int index) {
 		break;
 	}
 }
+
+// Idea: To shift the character "A" to the left, we must shift a bit of the hex value to the left
+void shiftBit () {
+	int msb = (matrix_buffer[0] & 0x80) >> 7;
+	matrix_buffer[0] = (matrix_buffer[0] << 1) + msb;
+
+	msb = (matrix_buffer[1] & 0x80) >> 7;
+	matrix_buffer[1] = (matrix_buffer[1] << 1) + msb;
+
+	msb = (matrix_buffer[2] & 0x80) >> 7;
+	matrix_buffer[2] = (matrix_buffer[2] << 1) + msb;
+
+	msb = (matrix_buffer[3] & 0x80) >> 7;
+	matrix_buffer[3] = (matrix_buffer[3] << 1) + msb;
+
+	msb = (matrix_buffer[4] & 0x80) >> 7;
+	matrix_buffer[4] = (matrix_buffer[4] << 1) + msb;
+
+	msb = (matrix_buffer[5] & 0x80) >> 7;
+	matrix_buffer[5] = (matrix_buffer[5] << 1) + msb;
+
+	msb = (matrix_buffer[6] & 0x80) >> 7;
+	matrix_buffer[6] = (matrix_buffer[6] << 1) + msb;
+
+	msb = (matrix_buffer[7] & 0x80) >> 7;
+	matrix_buffer[7] = (matrix_buffer[7] << 1) + msb;
+}
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -131,7 +158,7 @@ static void MX_TIM2_Init(void);
 // Use  setTimer1(250) and TIMER_CYCLE = 10, we have the timer1_counter = 25, therefore, the switching time between 7-SEG LEDS is 0.25s
 int timer2_counter = 0;
 int timer2_flag = 0;
-int TIMER_CYCLE = 10;
+int TIMER_CYCLE = 1;
 void setTimer2 (int duration) {
 	timer2_counter = duration / TIMER_CYCLE;
 	timer2_flag = 0;
@@ -188,6 +215,7 @@ int main(void)
 		  setTimer2(4);
 		  updateLEDMatrix(index++);
 		  if (index > 7) {
+			  shiftBit();
 			  index = 0;
 		  }
 	  }
