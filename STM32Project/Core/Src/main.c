@@ -300,18 +300,24 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+// LED toggles every cycle, DOT toggles every second
 int counter = 100;
-int flag = 0;
+int cycle_flag = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (index_led > 3) {
 		index_led = 0;
+		cycle_flag = 1;
 	}
 	counter--;
 	if (counter == 0) {
 		counter = 100;
+		if (cycle_flag == 1) {
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+			cycle_flag = 0;
+		}
 		update7SEG(index_led++);
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	}
 }
 /* USER CODE END 4 */
