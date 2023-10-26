@@ -133,9 +133,9 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN 0 */
 int timer0_counter = 0;
 int timer0_flag = 0;
-int TIME_CYCLE = 10;
+int TIMER_CYCLE = 10;
 void setTimer0 (int duration) {
-	timer0_counter = duration / TIME_CYCLE;
+	timer0_counter = duration / TIMER_CYCLE;
 	timer0_flag = 0;
 }
 void timer_run () {
@@ -181,6 +181,26 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int hour = 15, minute = 8, second = 50;
+  void updateClockBuffer () {
+  	if (minute <= 9) {
+  		led_buffer[2] = 0;
+  		led_buffer[3] = minute;
+  	}
+  	else {
+  		led_buffer[2] = minute / 10;
+  		led_buffer[3] = minute % 10;
+  	}
+
+  	if (hour <= 9) {
+  		led_buffer[0] = 0;
+  		led_buffer[1] = hour;
+  	}
+  	else {
+  		led_buffer[0] = hour / 10;
+  		led_buffer[1] = hour % 10;
+  	}
+  }
   setTimer0(1000);
   while (1)
   {
